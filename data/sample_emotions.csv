@@ -1,0 +1,21 @@
+text,emotion
+"I'm so lost on recursion, nothing makes sense",Confused
+"This lecture is dragging on forever, I can't focus",Bored
+"I finally understand how backpropagation works, I've got this",Confident
+"Wait, how does gradient descent actually find the minimum? I want to know more",Curious
+"I've tried this bug fix five times and it still fails, I'm so annoyed",Frustrated
+"Why do neural networks even need activation functions? Interesting topic",Curious
+"I have no idea what a hash table even is, this is confusing",Confused
+"Nothing about this topic interests me, it's the same thing every class",Bored
+"I aced the practice quiz, I feel ready for the real exam",Confident
+"I keep getting the same error and I don't know why, this is so frustrating",Frustrated
+"Can someone explain why my loop never terminates? I'm intrigued by the logic",Curious
+"I understand OOP now, pretty confident I can build the project",Confident
+"This assignment is repetitive and dull, I just want it to end",Bored
+"I don't get the difference between overfitting and underfitting",Confused
+"I've rewritten this function ten times and it's still broken, ugh",Frustrated
+"How does a transformer model pay attention to different words? Fascinating",Curious
+"I feel great about my understanding of SQL joins now",Confident
+"None of this makes sense, recursion and base cases are a blur",Confused
+"I'm bored out of my mind reading this textbook chapter",Bored
+"Every time I fix one bug, three more appear, I'm losing my patience",Frustrated

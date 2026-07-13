@@ -1,0 +1,16 @@
+venv/
+__pycache__/
+*.pyc
+.env
+models/*.h5
+models/*.pkl
+models/bert_emotion/
+models/bert_checkpoints/
+models/*.keras
+logs/*.csv
+.cache/
+.env.txt
+output.txt
+
+#Streamlit local configurations
+.streamlit/
