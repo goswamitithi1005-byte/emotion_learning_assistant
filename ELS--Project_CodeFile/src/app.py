@@ -6,7 +6,6 @@ Run:
 """
 import os
 os.environ["KERAS_BACKEND"] = "torch"
-import os
 import sys
 import pandas as pd
 import plotly.express as px
@@ -28,8 +27,16 @@ def get_detector():
         load_bert=os.path.exists(BERT_MODEL_DIR),
     )
 
-
 detector = get_detector()
+
+# Initialize session state tracking properties cleanly
+if "last_result" not in st.session_state:
+    st.session_state.last_result = None
+    st.session_state.last_text = ""
+    st.session_state.last_model = ""
+    st.session_state.last_field = "General"
+if "current_guidance" not in st.session_state:
+    st.session_state.current_guidance = None
 
 with st.sidebar:
     st.subheader("System Status")
@@ -80,11 +87,9 @@ with tab_assistant:
         )
         submit = st.button("Analyze", type="primary")
 
-    if "last_result" not in st.session_state:
-        st.session_state.last_result = None
-        st.session_state.last_text = ""
-        st.session_state.last_model = ""
-        st.session_state.last_field = "General"
+    # Flag parameters to control API invocation loops
+    trigger_generation = False
+    regenerate = False
 
     if submit and user_text.strip():
         with st.spinner("Analyzing emotional state..."):
@@ -94,6 +99,10 @@ with tab_assistant:
                 st.session_state.last_text = user_text
                 st.session_state.last_model = model_choice
                 st.session_state.last_field = field
+                
+                # Force generation to run immediately upon a fresh submission click
+                trigger_generation = True 
+                st.session_state.current_guidance = None 
             except RuntimeError as e:
                 st.error(str(e))
     elif submit:
@@ -104,7 +113,7 @@ with tab_assistant:
         st.divider()
         st.subheader("Emotion Breakdown")
 
-        if model_choice == "both" and "bilstm" in result and "bert" in result:
+        if st.session_state.last_model == "both" and "bilstm" in result and "bert" in result:
             c1, c2 = st.columns(2)
             with c1:
                 st.markdown("**BiLSTM**")
@@ -127,23 +136,33 @@ with tab_assistant:
         if show_ai:
             st.divider()
             st.subheader("Personalized Guidance")
-            regenerate = st.button("🔄 Regenerate response")
-            with st.spinner("Generating personalized guidance..."):
-                guidance = generate_guidance(
-                    st.session_state.last_text, result["top_emotion"],
-                    result["mixed_emotions"], field=st.session_state.last_field,
-                    regenerate=regenerate,
-                )
-            st.info(guidance)
+            
+            if st.button("🔄 Regenerate response"):
+                trigger_generation = True
+                regenerate = True
 
-            log_interaction(
-                text=st.session_state.last_text,
-                model_used=st.session_state.last_model,
-                top_emotion=result["top_emotion"],
-                mixed_emotions=result["mixed_emotions"],
-                confidence=result["final"][result["top_emotion"]],
-                guidance=guidance,
-            )
+            # Call the external API ONLY if requested, otherwise display the cached text block
+            if trigger_generation or st.session_state.current_guidance is None:
+                with st.spinner("Generating personalized guidance..."):
+                    guidance = generate_guidance(
+                        st.session_state.last_text, result["top_emotion"],
+                        result["mixed_emotions"], field=st.session_state.last_field,
+                        regenerate=regenerate,
+                    )
+                    st.session_state.current_guidance = guidance
+                    
+                    # Log data securely only upon fresh evaluation cycles
+                    log_interaction(
+                        text=st.session_state.last_text,
+                        model_used=st.session_state.last_model,
+                        top_emotion=result["top_emotion"],
+                        mixed_emotions=result["mixed_emotions"],
+                        confidence=result["final"][result["top_emotion"]],
+                        guidance=guidance,
+                    )
+            
+            # Render the structural text payload directly out of the state container array
+            st.info(st.session_state.current_guidance)
             st.caption("Saved to interaction log ✅")
 
 # =========================================================
